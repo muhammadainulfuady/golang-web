@@ -43,7 +43,6 @@ func TestCookie(t *testing.T) {
 	if err != nil {
 		return
 	}
-
 }
 
 func TestSetCookie(t *testing.T) {
@@ -62,7 +61,7 @@ func TestSetCookie(t *testing.T) {
 func TestGetCookie(t *testing.T) {
 	request := httptest.NewRequest(http.MethodGet, "http://localhost:8080/?name=herlambang", nil)
 	recorder := httptest.NewRecorder()
-	
+
 	cookie := new(http.Cookie)
 	cookie.Name = "X-ILHAMGOOD-Name"
 	cookie.Value = request.URL.Query().Get("name")
