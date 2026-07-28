@@ -11,6 +11,8 @@
       <p>Street : {{ .Street }}</p>
       <p>City : {{ .City }}</p>
       <p>Country : {{ .Country }}</p>
+    {{ else }}
+      <p>No address provided</p>
     {{ end }}
   </body>
 </html>
