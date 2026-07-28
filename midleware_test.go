@@ -16,24 +16,51 @@ func (middleware *LogMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Reques
 	fmt.Println("After Execure Handler")
 }
 
+type ErrorHandler struct {
+	Handler http.Handler
+}
+
+func (errorHandler *ErrorHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	defer func() {
+		if err := recover(); err != nil {
+			fmt.Println("Terjadi Error")
+			w.WriteHeader(http.StatusInternalServerError)
+			fmt.Fprintf(w, "Internal Server Error %s", err)
+		}
+	}()
+	errorHandler.Handler.ServeHTTP(w, r)
+}
+
 func TestMiddleware(t *testing.T) {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Handler Executed")
 		fmt.Fprint(w, "Hello, Middleware!")
 	})
+	mux.HandleFunc("/foo", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Println("Foo Executed")
+		fmt.Fprint(w, "Hello, foo!")
+	})
+	mux.HandleFunc("/panic", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Println("Panic Executed")
+		panic("This is a test panic!")
+	})
 
 	logMiddlewaer := &LogMiddleware{
 		Handler: mux,
 	}
 
+	errorHandler := &ErrorHandler{
+		Handler: logMiddlewaer,
+	}
+
 	server := http.Server{
 		Addr:    "localhost:8080",
-		Handler: logMiddlewaer,
+		Handler: errorHandler,
 	}
 
 	err := server.ListenAndServe()
 	if err != nil {
-		return
+		panic(err)
 	}
 }
